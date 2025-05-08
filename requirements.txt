@@ -1,0 +1,5 @@
+opencv-python
+torch
+ultralytics
+cv_bridge
+python-telegram-bot
