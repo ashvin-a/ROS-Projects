@@ -4,7 +4,7 @@
   <name>perception_node</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="=">ashvin</maintainer>
+  <maintainer email="ashvinanilkumarsh@gmail.com">ashvin</maintainer>
   <license>TODO: License declaration</license>
 
   <test_depend>ament_copyright</test_depend>
