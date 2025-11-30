@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="segway">
+  <xacro:property name="wheel_radius" value="0.08"/>
+  <xacro:property name="wheel_width"  value="0.04"/>
+  <xacro:property name="body_radius" value="0.15"/>
+  <xacro:property name="body_height" value="0.4"/>
+
+  <!-- Base link (body) -->
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <!-- tune mass/inertia to get reasonable dynamics -->
+      <mass value="6.0"/>
+      <inertia ixx="0.2" ixy="0.0" ixz="0.0" iyy="0.2" iyz="0.0" izz="0.2"/>
+    </inertial>
+    <!-- simple visual/collision -->
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="${body_radius}" length="${body_height}"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="${body_radius}" length="${body_height}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Left wheel -->
+  <link name="wheel_left">
+    <visual>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 1.5708 0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.5"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <!-- Right wheel -->
+  <link name="wheel_right">
+    <visual>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 1.5708 0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 1.5708 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.5"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <!-- Joints -->
+  <joint name="left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child  link="wheel_left"/>
+    <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <joint name="right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child  link="wheel_right"/>
+    <origin xyz="0 0 -${wheel_radius}" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <!-- Transmissions are optional for low-fidelity approach -->
+  <!-- Add an IMU plugin (Gazebo) to publish /imu -->
+  <gazebo reference="base_link">
+    <sensor type="imu" name="imu_sensor">
+      <always_on>1</always_on>
+      <update_rate>200.0</update_rate>
+      <imu>
+        <topic>/imu</topic>
+        <gaussian_noise>0.01</gaussian_noise>
+      </imu>
+    </sensor>
+  </gazebo>
+
+  <!-- Differential drive plugin: listens to /cmd_vel -->
+  <gazebo>
+    <plugin name="diff_drive" filename="libgazebo_ros_diff_drive.so">
+      <robotNamespace>/</robotNamespace>
+      <leftWheelJoint>left_wheel_joint</leftWheelJoint>
+      <rightWheelJoint>right_wheel_joint</rightWheelJoint>
+      <wheelSeparation>0.28</wheelSeparation>
+      <wheelDiameter>${wheel_radius*2}</wheelDiameter>
+      <cmdTopic>/cmd_vel</cmdTopic>
+      <odometryTopic>/odom</odometryTopic>
+      <odometryFrame>odom</odometryFrame>
+      <updateRate>100.0</updateRate>
+      <publishWheelTF>1</publishWheelTF>
+      <gaussianNoise>0.001</gaussianNoise>
+    </plugin>
+  </gazebo>
+</robot>
